@@ -1,16 +1,18 @@
 package me.n1ar4.jar.analyzer.gui.util;
 
 import com.github.rjeschke.txtmark.Processor;
-import me.n1ar4.flappy.FBMainFrame;
-import me.n1ar4.http.HttpResponse;
-import me.n1ar4.http.Y4Client;
-import me.n1ar4.jar.analyzer.gui.ChangeLogForm;
-import me.n1ar4.jar.analyzer.gui.GlobalOptions;
-import me.n1ar4.jar.analyzer.gui.MainForm;
+import me.n1ar4.games.flappy.FBMainFrame;
+import me.n1ar4.games.plane.Game;
+import me.n1ar4.games.pocker.Main;
+import me.n1ar4.jar.analyzer.config.ConfigEngine;
+import me.n1ar4.jar.analyzer.config.ConfigFile;
+import me.n1ar4.jar.analyzer.gui.*;
+import me.n1ar4.jar.analyzer.http.HttpResponse;
+import me.n1ar4.jar.analyzer.http.Y4Client;
+import me.n1ar4.jar.analyzer.os.SystemChart;
 import me.n1ar4.jar.analyzer.starter.Const;
 import me.n1ar4.log.LogManager;
 import me.n1ar4.log.Logger;
-import me.n1ar4.pocker.Main;
 import me.n1ar4.shell.analyzer.form.ShellForm;
 
 import javax.imageio.ImageIO;
@@ -32,13 +34,20 @@ public class MenuUtil {
     private static final JCheckBoxMenuItem chineseConfig = new JCheckBoxMenuItem("Chinese");
     private static final JCheckBoxMenuItem englishConfig = new JCheckBoxMenuItem("English");
 
+    public static void setLangFlag() {
+        if (GlobalOptions.getLang() == GlobalOptions.CHINESE) {
+            chineseConfig.setState(true);
+        } else if (GlobalOptions.getLang() == GlobalOptions.ENGLISH) {
+            englishConfig.setState(true);
+        }
+    }
+
     static {
         showInnerConfig.setState(false);
         fixClassPathConfig.setState(false);
         sortedByMethodConfig.setState(false);
         sortedByClassConfig.setState(true);
-        englishConfig.setState(true);
-        chineseConfig.setState(false);
+        logAllSqlConfig.setSelected(true);
 
         chineseConfig.addActionListener(e -> {
             chineseConfig.setState(chineseConfig.getState());
@@ -46,9 +55,16 @@ public class MenuUtil {
             if (chineseConfig.getState()) {
                 logger.info("use chinese language");
                 GlobalOptions.setLang(GlobalOptions.CHINESE);
-                MainForm.refreshLang();
+                MainForm.refreshLang(true);
                 JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(),
                         "已切换到中文");
+                ConfigFile cf = MainForm.getConfig();
+                if (cf == null) {
+                    return;
+                }
+                cf.setLang("zh");
+                MainForm.setConfig(cf);
+                ConfigEngine.saveConfig(cf);
             }
         });
 
@@ -58,9 +74,16 @@ public class MenuUtil {
             if (englishConfig.getState()) {
                 logger.info("use english language");
                 GlobalOptions.setLang(GlobalOptions.ENGLISH);
-                MainForm.refreshLang();
+                MainForm.refreshLang(true);
                 JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(),
                         "use english language");
+                ConfigFile cf = MainForm.getConfig();
+                if (cf == null) {
+                    return;
+                }
+                cf.setLang("en");
+                MainForm.setConfig(cf);
+                ConfigEngine.saveConfig(cf);
             }
         });
 
@@ -98,12 +121,54 @@ public class MenuUtil {
     public static JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(createAboutMenu());
-        menuBar.add(createVersionMenu());
         menuBar.add(createConfigMenu());
         menuBar.add(language());
-        menuBar.add(createShellAnalyzer());
+        menuBar.add(loadRemote());
+        menuBar.add(exportJava());
         menuBar.add(createGames());
+        JMenu system = new JMenu("system info");
+        JMenuItem systemItem = new JMenuItem("open");
+        systemItem.addActionListener(e -> SystemChart.start0());
+        system.add(systemItem);
+        menuBar.add(system);
         return menuBar;
+    }
+
+    private static JMenu exportJava() {
+        JMenu export = new JMenu("export");
+        JMenuItem proxyItem = new JMenuItem("decompile and export");
+        proxyItem.setIcon(IconManager.javaIcon);
+        proxyItem.addActionListener(e -> {
+            if (MainForm.getEngine() == null) {
+                JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(),
+                        "PLEASE LOAD JAR FIRST");
+                return;
+            }
+            ExportForm.start();
+        });
+        export.add(proxyItem);
+        return export;
+    }
+
+    private static JMenu loadRemote() {
+        JMenu loadRemote = new JMenu("remote");
+        JMenuItem loadByHttp = new JMenuItem("load jars (http)");
+        loadByHttp.setIcon(IconManager.javaIcon);
+        loadByHttp.addActionListener(e -> RemoteHttp.start());
+        loadRemote.add(loadByHttp);
+        JMenuItem start = new JMenuItem("start tomcat analyzer");
+        start.setIcon(IconManager.javaIcon);
+        start.addActionListener(e -> ShellForm.start0());
+        loadRemote.add(start);
+        JMenuItem dbgItem = new JMenuItem("open bytecode debugger");
+        dbgItem.setIcon(IconManager.javaIcon);
+        dbgItem.addActionListener(e -> me.n1ar4.dbg.gui.MainForm.start());
+        loadRemote.add(dbgItem);
+        JMenuItem proxyItem = new JMenuItem("open proxy config");
+        proxyItem.setIcon(IconManager.javaIcon);
+        proxyItem.addActionListener(e -> ProxyForm.start());
+        loadRemote.add(proxyItem);
+        return loadRemote;
     }
 
     private static JMenu createGames() {
@@ -127,8 +192,20 @@ public class MenuUtil {
             ImageIcon pokerIcon = new ImageIcon(ImageIO.read(is));
             pokerItem.setIcon(pokerIcon);
             pokerItem.addActionListener(e -> new Thread(Main::new).start());
+
+            JMenuItem planeItem = new JMenuItem("雷电");
+            is = MainForm.class.getClassLoader().getResourceAsStream(
+                    "game/plane/logo.png");
+            if (is == null) {
+                return null;
+            }
+            ImageIcon planeIcon = new ImageIcon(ImageIO.read(is));
+            planeItem.setIcon(planeIcon);
+            planeItem.addActionListener(e -> Game.start());
+
             gameMenu.add(flappyItem);
             gameMenu.add(pokerItem);
+            gameMenu.add(planeItem);
             return gameMenu;
         } catch (Exception ex) {
             logger.error("error: {}", ex.toString());
@@ -148,19 +225,6 @@ public class MenuUtil {
         return null;
     }
 
-    private static JMenu createShellAnalyzer() {
-        try {
-            JMenu configMenu = new JMenu("tomcat-analyzer");
-            JMenuItem start = new JMenuItem("start");
-            start.addActionListener(e -> ShellForm.start0());
-            configMenu.add(start);
-            return configMenu;
-        } catch (Exception ex) {
-            logger.error("error: {}", ex.toString());
-        }
-        return null;
-    }
-
     private static JMenu createConfigMenu() {
         try {
             JMenu configMenu = new JMenu("config");
@@ -169,6 +233,10 @@ public class MenuUtil {
             configMenu.add(sortedByMethodConfig);
             configMenu.add(sortedByClassConfig);
             configMenu.add(logAllSqlConfig);
+            JMenuItem partitionConfig = new JMenuItem("partition config");
+            partitionConfig.setIcon(IconManager.javaIcon);
+            partitionConfig.addActionListener(e -> PartForm.start());
+            configMenu.add(partitionConfig);
             return configMenu;
         } catch (Exception ex) {
             logger.error("error: {}", ex.toString());
@@ -214,24 +282,14 @@ public class MenuUtil {
                     logger.error("error: {}", ex.toString());
                 }
             });
-
-            return aboutMenu;
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
-    private static JMenu createVersionMenu() {
-        try {
-            JMenu verMenu = new JMenu("version");
             JMenuItem jarItem = new JMenuItem("version: " + Const.version);
-            InputStream is = MainForm.class.getClassLoader().getResourceAsStream("img/ver.png");
+            is = MainForm.class.getClassLoader().getResourceAsStream("img/ver.png");
             if (is == null) {
                 return null;
             }
-            ImageIcon imageIcon = new ImageIcon(ImageIO.read(is));
+            imageIcon = new ImageIcon(ImageIO.read(is));
             jarItem.setIcon(imageIcon);
-
+            aboutMenu.add(jarItem);
             JMenuItem updateItem = new JMenuItem("changelogs");
             is = MainForm.class.getClassLoader().getResourceAsStream("img/update.png");
             if (is == null) {
@@ -257,7 +315,7 @@ public class MenuUtil {
                     logger.error("error: {}", ex.toString());
                 }
             });
-
+            aboutMenu.add(updateItem);
             JMenuItem downItem = new JMenuItem("check update");
             is = MainForm.class.getClassLoader().getResourceAsStream("img/normal.png");
             if (is == null) {
@@ -266,27 +324,25 @@ public class MenuUtil {
             imageIcon = new ImageIcon(ImageIO.read(is));
             downItem.setIcon(imageIcon);
             downItem.addActionListener(e -> {
-                HttpResponse resp = Y4Client.INSTANCE.get(Const.checkUpdateUrl);
-                String body = new String(resp.getBody());
-                if (body.isEmpty()) {
-                    return;
-                }
-                String ver = body.trim();
-                LogUtil.log("latest: " + ver);
-                String output;
-                output = String.format("%s: %s\n%s: %s",
-                        "Current Version", Const.version,
-                        "Latest Version", ver);
-                JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(), output);
+                new Thread(() -> {
+                    HttpResponse resp = Y4Client.INSTANCE.get(Const.checkUpdateUrl);
+                    String body = new String(resp.getBody());
+                    if (body.isEmpty()) {
+                        return;
+                    }
+                    String ver = body.trim();
+                    LogUtil.info("latest: " + ver);
+                    String output;
+                    output = String.format("%s: %s\n%s: %s",
+                            "Current Version", Const.version,
+                            "Latest Version", ver);
+                    JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(), output);
+                }).start();
             });
-
-            verMenu.add(jarItem);
-            verMenu.add(updateItem);
-            verMenu.add(downItem);
-            return verMenu;
+            aboutMenu.add(downItem);
+            return aboutMenu;
         } catch (Exception ex) {
-            logger.error("error: {}", ex.toString());
+            return null;
         }
-        return null;
     }
 }

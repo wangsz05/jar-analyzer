@@ -8,10 +8,15 @@ public class ConfigFile {
     private String totalJar;
     private String totalClass;
     private String totalMethod;
-    private String gptHost;
-    private String gptKey;
-    private String gptProxyHost;
-    private String gptProxyPort;
+    private String lang;
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+    }
 
     public String getJarPath() {
         return jarPath;
@@ -69,38 +74,6 @@ public class ConfigFile {
         this.totalMethod = totalMethod;
     }
 
-    public String getGptHost() {
-        return gptHost;
-    }
-
-    public void setGptHost(String gptHost) {
-        this.gptHost = gptHost;
-    }
-
-    public String getGptKey() {
-        return gptKey;
-    }
-
-    public void setGptKey(String gptKey) {
-        this.gptKey = gptKey;
-    }
-
-    public String getGptProxyHost() {
-        return gptProxyHost;
-    }
-
-    public void setGptProxyHost(String gptProxyHost) {
-        this.gptProxyHost = gptProxyHost;
-    }
-
-    public String getGptProxyPort() {
-        return gptProxyPort;
-    }
-
-    public void setGptProxyPort(String gptProxyPort) {
-        this.gptProxyPort = gptProxyPort;
-    }
-
     @Override
     public String toString() {
         return "ConfigFile{" +
@@ -111,10 +84,6 @@ public class ConfigFile {
                 ", totalJar='" + totalJar + '\'' +
                 ", totalClass='" + totalClass + '\'' +
                 ", totalMethod='" + totalMethod + '\'' +
-                ", gptHost='" + gptHost + '\'' +
-                ", gptKey='" + gptKey + '\'' +
-                ", gptProxyHost='" + gptProxyHost + '\'' +
-                ", gptProxyPort='" + gptProxyPort + '\'' +
                 '}';
     }
 }

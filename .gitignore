@@ -46,9 +46,14 @@ target/
 .jar-analyzer
 .idea/
 jar-analyzer-temp/
+jar-analyzer-download/
 build/jre/jre/
 jar-analyzer-lockfile
 *.h
 token.txt
 cmake-*/
 *.dat
+logs/
+*.class
+*.ser
+*.html

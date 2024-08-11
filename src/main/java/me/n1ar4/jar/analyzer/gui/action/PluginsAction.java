@@ -2,11 +2,11 @@ package me.n1ar4.jar.analyzer.gui.action;
 
 import me.n1ar4.jar.analyzer.el.ELForm;
 import me.n1ar4.jar.analyzer.gui.MainForm;
-import me.n1ar4.jar.analyzer.plugins.chatgpt.ChatGPTForm;
 import me.n1ar4.jar.analyzer.plugins.encoder.EncodeUtilForm;
 import me.n1ar4.jar.analyzer.plugins.listener.ListenUtilForm;
 import me.n1ar4.jar.analyzer.plugins.obfuscate.ObfuscateForm;
 import me.n1ar4.jar.analyzer.plugins.repeater.HttpUtilForm;
+import me.n1ar4.jar.analyzer.plugins.serutil.SerUtilForm;
 import me.n1ar4.jar.analyzer.plugins.sqlite.SQLiteForm;
 import me.n1ar4.jar.analyzer.starter.Const;
 
@@ -16,14 +16,13 @@ public class PluginsAction {
     public static void startELForm() {
         JFrame frame = new JFrame(Const.SPELSearch);
         frame.setContentPane(new ELForm().elPanel);
+        frame.setLocationRelativeTo(MainForm.getInstance().getMasterPanel());
         frame.pack();
         frame.setResizable(false);
         frame.setVisible(true);
     }
 
     public static void run() {
-        MainForm.getInstance().getGptButton().addActionListener(e -> ChatGPTForm.start());
-
         MainForm.getInstance().getSqliteButton().addActionListener(e -> SQLiteForm.start());
 
         MainForm.getInstance().getEncoderBtn().addActionListener(e -> EncodeUtilForm.start());
@@ -36,6 +35,8 @@ public class PluginsAction {
 
         MainForm.getInstance().getStartELSearchButton().addActionListener(e -> startELForm());
 
-        MainForm.getInstance().getObfBtn().addActionListener(e-> ObfuscateForm.start());
+        MainForm.getInstance().getObfBtn().addActionListener(e -> ObfuscateForm.start());
+
+        MainForm.getInstance().getSerUtilBtn().addActionListener(e -> SerUtilForm.start());
     }
 }

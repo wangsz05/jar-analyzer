@@ -1,7 +1,5 @@
 ## 子项目
 
-![](../img/0031.png)
-
 ### Tomcat Analyzer
 
 该项目位于`me.n1ar4.shell.analyzer`中，这是一个分析`Tomcat`内存马的工具
@@ -56,18 +54,6 @@
 | Listener | javax.servlet.ServletRequestListener | requestDestroyed   | 
 | Listener | javax.servlet.ServletRequestListener | requestInitialized | 
 | Valve    | org.apache.catalina.Valve            | invoke             |
-
-### Y4-HTTP
-
-该项目位于`me.n1ar4.http`中，这是一个手动构造和解析`HTTP/1.1`协议的`HTTP`客户端库
-
-[代码](../src/main/java/me/n1ar4/http)
-
-### Y4-JSON
-
-该项目位于`me.n1ar4.y4json`中，这是一个模仿`Fastjson API`定义的简单的`JSON`序列化和反序列化库
-
-[代码](../src/main/java/me/n1ar4/y4json)
 
 ### Y4-LOG
 

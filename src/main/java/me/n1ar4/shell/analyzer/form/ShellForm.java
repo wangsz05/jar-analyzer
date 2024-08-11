@@ -5,7 +5,9 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import me.n1ar4.jar.analyzer.gui.MainForm;
+import me.n1ar4.jar.analyzer.starter.Version;
 import me.n1ar4.jar.analyzer.utils.OSUtil;
+import me.n1ar4.jar.analyzer.utils.SocketUtil;
 import me.n1ar4.shell.analyzer.model.ClassObj;
 import me.n1ar4.shell.analyzer.model.ProcessObj;
 import me.n1ar4.shell.analyzer.start.SocketHelper;
@@ -575,7 +577,7 @@ public class ShellForm {
     public static void start0() {
         // check windows
         // 目前该功能仅给 Windows 使用
-        if (!OSUtil.isWindows()) {
+        if (!OSUtil.isWindows() || !Version.isJava8()) {
             JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(),
                     "<html>" +
                             "only support jdk8/windows<br>" +
@@ -586,9 +588,21 @@ public class ShellForm {
             return;
         }
 
+        // 检查端口 10033 端口是否被占用
+        if (SocketUtil.isPortInUse("localhost", 10033)) {
+            JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(),
+                    "<html>" +
+                            "10033 port in use<br>" +
+                            "10033 端口被占用<br>" +
+                            "该功能需要使用该端口" +
+                            "</html>");
+            return;
+        }
+
         JFrame frame = new JFrame("tomcat-analyzer by 4ra1n");
         instance = new ShellForm();
         frame.setContentPane(instance.shellPanel);
+        frame.setLocationRelativeTo(MainForm.getInstance().getMasterPanel());
         frame.pack();
 
         frame.setResizable(false);

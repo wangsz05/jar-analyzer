@@ -1,28 +1,365 @@
 # CHANGELOG
 
+## 3.0
+
+更新多个重要功能，多个安全增强改进，删除无意义功能
+
+更新日志：
+
+- [重要] 代码区域支持选中方法名右键搜索调用信息
+- [重要] 代码区域支持选中字符串右键搜索相关指令
+- [重要] 添加方法记录功能（右键保存至备忘录需要时查看）
+- [功能] 支持一键生成当前方法调用的 `HTML` 图
+- [功能] 分析历史和记录功能合并到同个 `PANEL` 中
+- [功能] 方法记录功能允许删除单个和全部清除
+- [功能] 语言切换支持保存重启后读取记录生效
+- [BUG] 修复某些情况 `AWT` 线程出现异常报错
+- [优化] `full` 和 `system` 版本使用 `G1GC`
+- [优化] 修改 `Xmx` 和 `Xms` 到更合适的值
+- [优化] 自定义 `SecurityManager` 替代 `RASP`
+- [优化] 自定义 `ObjectInputFilter` 保护程序
+- [优化] `API Server` 添加 `favicon.ico`
+- [其他] 内置 `JRE` 改成 `Eclipse Temurin`
+- [其他] 删除修改字节码中方法名的测试功能（无意义）
+- [其他] 删除 `CLASS-SEARCHER` 子项目（无意义）
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+
+- `windows-full` 版内置开启 `G1GC` 的 `JRE 8` 环境 (**完整版本**)
+- `windows-21` 版内置开启 `ZGC` 的 `JRE 21` 环境（仅包含核心功能）
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+一般推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.24
+
+大幅优化 `SCA` 扫描逻辑，提高扫描效率
+
+更新日志：
+
+- [SCA-重要] 大幅提升 `SCA` 的扫描速度
+- [SCA-BUG] SHIRO SCA 扫描包含多个重复的结果
+- [SCA-BUG] 修复 `FASTJSON` 漏洞分数的问题
+- [SCA-FEAT] 应该只遍历一次 `JAR` 文件以提高效率
+- [SCA-FEAT] 分析 `JAR` 代码避免使用递归
+- [SCA-FEAT] 压缩 `HTML` 报告的大小
+- [BUG] 选中非方法时不会刷新 `CALL/IMPL` 区域
+- [BUG] 文件树选择文件某些情况下不在屏幕范围内
+- [BUG] 文件树搜索不会自动滚动到高亮文件
+- [其他] 简单调整 `UI` 界面
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-21` 版内置开启 `ZGC` 的 `JRE 21` 环境（仅包含核心功能）
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+一般推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.23
+
+重要更新：新增 `SCA` 分析模块，输入 `JAR` 即可分析得到匹配的 `CVE` 漏洞
+
+更新日志：
+
+- [重要] 支持了 `SCA` 检测
+- [功能] 反编译代码展示应该自动在文件树选中
+- [SCA] 支持 `Apache Log4j2` 全版本的匹配
+- [SCA] 支持 `Apache Shiro` 全版本的匹配
+- [SCA] 支持 `FASTJSON 1.X` 几乎全版本的匹配
+- [SCA] 支持 `ASSEMBLY JAR` 和 `LIB JAR` 两种检测
+- [SCA] 内置常见的 `CVE` 漏洞和描述信息用于报告
+- [SCA] 支持一键导出 `HTML` 漏洞报告
+- [BUG] 文件数区域搜索 `SPRINGBOOT` 项目报错问题
+- [BUG] 代码区域空搜索导致卡死的问题
+- [BUG] 批量反编译代码没有加载 `JAR` 时报错问题
+- [BUG] 修复某些情况代码树搜索框不完全显示的问题
+- [优化] 优化代码区域搜索界面和搜索高亮展示方式
+- [优化] 整体优化 `GUI` 排列布局
+- [优化] 优化批量反编译功能的用户体验
+- [优化] 优化未加载 `JAR` 时各种搜索的报错
+- [优化] 优化黑白名单等配置界面的字体
+- [优化] 优化 `SQL` 语句日志输出信息内容
+- [优化] 优化某些不必要的日志输出
+- [其他] 删除体积巨大的测试文件方便社区贡献
+- [其他] 更新依赖
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-21` 版内置开启 `ZGC` 的 `JRE 21` 环境（仅包含核心功能）
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+一般推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.22
+
+严重 `BUG` 紧急修复版本
+
+更新日志：
+
+- [重要] `Illegal group reference` 报错
+- [BUG] 构建数据库的效率过低（不应该构建阶段记录 `SQL` 语句）
+- [BUG] 修复 `API Server` 不传参数返回全部数据的问题
+- [其他] 增加 `ISSUE` 模板修改跳转链接
+- [其他] 更新 `attach.dll` 和 `tools.jar` 到最新
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-21` 版内置开启 `ZGC` 的 `JRE 21` 环境（仅包含核心功能）
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+一般推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.21
+
+重要更新: 分析时已支持类和包名的白名单，增加文件数部分的搜索
+
+- 包名的黑白名单应该是 `com.test.` 以 `.` 结尾表示包名
+- 类名的黑白名单应该是 `com.test.Test` 完整类名
+- 先判断白名单后判断黑名单，同时生效
+
+更新日志：
+
+- [重要] 分析时支持类和包名的白名单
+- [重要] 允许左侧文件树 `CTRL+F` 搜索类名高亮展示
+- [功能] 允许分析 `Spring` 根据 `Path` 搜索
+- [功能] 新增内置启用 `ZGC` 的 `JAVA 21` 的版本
+- [BUG] 修复某些情况下数据库覆盖的问题
+- [BUG] 修复 `API` 返回 `JSON` 过大的报错
+- [BUG] 修复某些情况下文件树没有高亮显示的问题
+- [优化] 优化 `API` 返回 `JSON` 的大小
+- [优化] 数据量巨大时某些功能可能的内存溢出
+- [优化] 优化黑名单白名单的解析和配置语法
+- [优化] 日志界面支持多种级别和彩色显示
+- [优化] `API Server` 启动检查端口冲突
+- [优化] 简单优化 `UI` 界面
+- [优化] 默认开启 `SQL` 语句执行记录
+- [其他] 启动时打印贡献者名单致谢
+- [其他] 更新内置 `JRE` 到 `8u422`
+- [其他] 修复 `CHANGELOG` 错误的描述
+- [其他] 引入 `hutool` 工具包
+- [其他] 升级依赖到最新
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+- Honey Baby (https://github.com/Gosiu)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-full-21` 版内置开启 `ZGC` 的 `JRE 21` 环境（仅包含核心功能）
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+一般推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.20
+
+高亮显示已选中的字符串，优化用户体验
+
+修复表达式搜索结果不完全的问题（并发问题）
+
+更新日志：
+
+- [重要] 支持代码区域选中的字符串全局高亮显示
+- [功能] 代码区域使用更美观的字体
+- [BUG] 表达式搜索同时包含类和方法注解时搜索不准确
+- [BUG] 表达式搜索进度条可能出现除0问题
+- [BUG] 远程分析 `JAR` 目录不存在时不可用
+- [BUG] 远程分析 `JAR` 的 `UI` 界面可能卡死
+- [BUG] 某些情况下检查输入大小会得到 `0` 的结果
+- [其他] 升级依赖到最新版
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.19
+
+新增多个皮肤，新增实时系统信息折线图，修复了一些已知问题
+
+更新日志：
+
+- [功能] 实时折线图展示 `CPU` 和内存占用
+- [功能] 分析目标前检查总输入大小并提醒
+- [功能] 启动时支持十种 `UI` 主题选择
+- [BUG] 修复某些情况下 `SPEL` 搜索卡住
+- [BUG] 修复 `Tomcat` 远程分析无法使用问题
+- [BUG] 修复某些情况下某些功能预期外的行为
+- [优化] 优化界面上对于两种黑名单的用法提示
+- [优化] 优化所有的 `JFrame` 显示位置
+- [优化] 启动时检查 `Java` 版本做出对应提示
+- [优化] 优化启动脚本和某些 `JVM` 参数
+- [优化] 优化菜单
+- [其他] 彩蛋
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.18
+
+新版本检查不再使用独立服务器了，成本过高，现在使用 `OSS` 方式
+
+新提供了 `HTTP API` 查询分析结果，参考 `README` 页面
+
+更新日志：
+
+- [功能] 提供 `HTTP API` 查询分析结果
+- [BUG] 修复第一次启动可能的 `UnsatisfiedLinkError`
+- [BUG] 修复手动检查更新不可用时卡死的问题
+- [优化] 使用 `OSS` 替换更新服务器降低成本
+- [优化] 删除某些不常用的库和插件
+- [优化] 应该开启二级缓存提高查询效率
+- [其他] 升级依赖
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.17
+
+更新日志：
+
+- [重要] 支持远程字节码指令级的单步调试
+- [重要] 支持从序列化数据一键提取恶意代码
+- [BUG] 修复高版本 `JDK` 在 `WINDOWS` 无法启动的问题
+- [优化] 合并和优化某些菜单选项
+- [其他] 升级某些依赖版本
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
+## 2.16
+
+支持通过 `export java` 菜单一键导出反编译后的 `JAVA` 代码
+
+安全公告：[GHSA-jmcg-r2c5-7m29](https://github.com/jar-analyzer/jar-analyzer/security/advisories/GHSA-jmcg-r2c5-7m29)
+
+更新日志：
+
+- [安全] 修复处理 `JAR` 时存在的 `ZIP SLIP` 漏洞
+- [功能] 支持一键导出反编译后的 `JAVA` 代码
+- [功能] 新增代理面板支持 `HTTP/SOCKS` 等代理
+- [功能] 支持根据实际情况动态设置数据库保存分区大小
+- [BUG] 忽略 `FERN FLOWER` 反编译报错终止问题
+- [BUG] 修复多屏时搜索框和远程加载框位置问题
+- [BUG] 解决输入的 `URL` 为空时报错
+- [优化] 保留编译信息允许用户进行调试
+- [优化] 补充没有 `ICON` 信息的菜单选项
+- [优化] 菜单部分的合并和优化
+
+感谢以下用户的贡献:
+
+- 4ra1n (https://github.com/4ra1n)
+
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
+
+- `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
+- `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
+- `zip` 版仅包含简单的 `jar` 文件 (使用 `java -jar` 启动)
+
+推荐使用 `windows-full` 版，包含完整功能，其他版本某些功能**可能**不可用
+
+如果你是 `ubuntu/mac` 用户请使用 `zip` 版本（**核心功能**可以正常使用）
+
 ## 2.15
 
 更新日志：
 
+- [重要] 代码区域支持 `Ctrl+F` 搜索
+- [重要] 支持通过 `HTTP` 远程加载
 - [BUG] 启动 `logo` 拼写错误问题
 - [优化] 优化命令行参数解析和处理部分代码
 - [优化] 删除 `zip` 版本中不必要的文件
+- [优化] 默认搜索选项改为模糊和调用搜索
 - [优化] 取消打印 `gc` 信息以提升性能
+- [优化] 使用稳定的 `okhttp` 代替轮子
+- [其他] 更新依赖库到最新版
+- [其他] 更新内置`JRE` 到 `8u412`
 - [其他] 更换 `UI` 界面的作者头像
 - [其他] 更新 `license` 时间信息
-
-考虑到新版本体积越来越大，需要加入国内下载地址（自费购买`OSS`节省使用）
-
-- [jar-analyzer-2.15.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.15/jar-analyzer-2.15.zip)
-- [jar-analyzer-2.15-windows-full.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.15/jar-analyzer-2.15-windows-full.zip)
-- [jar-analyzer-2.15-windows-system.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.15/jar-analyzer-2.15-windows-system.zip)
 
 感谢以下用户的贡献:
 
 - 4ra1n (https://github.com/4ra1n)
 - xishir (https://github.com/xishir)
 
-所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
 
 - `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
 - `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
@@ -42,21 +379,14 @@
 
 - [重要] 重构 `UI` 允许放大和全屏显示
 - [安全] 修复了几处 `SQL` 注入漏洞
-- [RASP] 默认的 `RASP` 配置关闭反序列化
 - [其他] 更新 `flatlaf` 和 `asm` 到最新版
 - [其他] 更新 `maven` 插件到最新版
-
-考虑到新版本体积越来越大，需要加入国内下载地址（自费购买`OSS`节省使用）
-
-- [jar-analyzer-2.14.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.14/jar-analyzer-2.14.zip)
-- [jar-analyzer-2.14-windows-full.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.14/jar-analyzer-2.14-windows-full.zip)
-- [jar-analyzer-2.14-windows-system.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.14/jar-analyzer-2.14-windows-system.zip)
 
 感谢以下用户的贡献:
 
 - 4ra1n (https://github.com/4ra1n)
 
-所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
 
 - `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
 - `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
@@ -68,26 +398,16 @@
 
 ## 2.13
 
-集成 `https://github.com/luelueking/ClazzSearcher` 作为 `jar-analyzer` 的命令行版本，未来版本可能会完善和修复
-
 更新日志：
 
-- [重要] 集成 [clazz-searcher](https://github.com/luelueking/ClazzSearcher) 项目作为命令行版本
 - [功能] 提供 `Windows` 版本的启动 `EXE`
 - [其他] 完善和优化 `README` 文档
-- [RASP] 优化 `RASP` 相关的功能和文件名长度
-
-考虑到新版本体积越来越大，需要加入国内下载地址（自费购买`OSS`节省使用）
-
-- [jar-analyzer-2.13.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.13/jar-analyzer-2.13.zip)
-- [jar-analyzer-2.13-windows-full.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.13/jar-analyzer-2.13-windows-full.zip)
-- [jar-analyzer-2.13-windows-system.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.13/jar-analyzer-2.13-windows-system.zip)
 
 感谢以下用户的贡献:
 
 - 4ra1n (https://github.com/4ra1n)
 
-所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
 
 - `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
 - `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)
@@ -101,12 +421,10 @@
 
 该版本更新内容较多，主要支持了原 `V1` 版本灵活的 `SPEL` 表达式搜索，但当数据过大时分析速度明显下降，之后的版本会尝试提高；
 另外删除了对 `Linux` 的专门版本，对于非 `Windows` 用户统一使用 `JAR` 版本即可，该版本保留了绝大多数核心的功能；
-对于 `Windows` 两种版本，默认开启简易的 `RASP` 用于保护程序不受到攻击（考虑到后续可能加入网络相关功能以确保安全）
 
 更新日志：
 
 - [重要] 支持表达式搜索（用法参考 `README` 文档）
-- [重要] 使用简易版自研 `RASP` 对程序进行保护
 - [功能] 支持开启记录所有 `SQL` 语句到日志文件
 - [BUG] 修复分析新 `JAR` 时不会刷新文件树的问题
 - [优化] 使用 `ConcurrentLinkedQueue` 解决并发问题
@@ -116,18 +434,12 @@
 - [其他] 更新发布类型（删除 `linux` 版增加 `zip` 版）
 - [其他] 完善 `CI` 对所有子项目进行测试
 
-考虑到新版本体积越来越大，需要加入国内下载地址（自费购买`OSS`节省使用）
-
-- [jar-analyzer-2.12.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.12/jar-analyzer-2.12.zip)
-- [jar-analyzer-2.12-windows-full.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.12/jar-analyzer-2.12-windows-full.zip)
-- [jar-analyzer-2.12-windows-system.zip](https://jar-analyzer.oss-cn-hangzhou.aliyuncs.com/2.12/jar-analyzer-2.12-windows-system.zip)
-
 感谢以下用户的贡献:
 
 - 4ra1n (https://github.com/4ra1n)
 - Gauss Zhou (https://github.com/gausszhou)
 
-所有可供下载的文件都由 `Github Actions` 构建，提供以下四种:
+所有可供下载的文件都由 `Github Actions` 构建，提供以下三种:
 
 - `windows-full` 版内置 `JRE 8` 环境 (**完整功能版本**)
 - `windows-system` 版使用系统 `JRE` 的启动脚本 (推荐安装 `JRE/JDK 8`)

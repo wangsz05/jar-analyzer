@@ -18,6 +18,7 @@ import me.n1ar4.log.LogManager;
 import me.n1ar4.log.Logger;
 import org.objectweb.asm.ClassReader;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -33,17 +34,61 @@ public class CoreRunner {
     private static final Logger logger = LogManager.getLogger();
 
     public static void run(Path jarPath, Path rtJarPath, boolean fixClass) {
+        // 2024-07-05 不允许太大的 JAR 文件
+        long totalSize = 0;
+        if (Files.isDirectory(jarPath)) {
+            List<String> files = DirUtil.GetFiles(jarPath.toAbsolutePath().toString());
+            if (rtJarPath != null) {
+                files.add(rtJarPath.toAbsolutePath().toString());
+            }
+            for (String s : files) {
+                if (s.toLowerCase().endsWith(".jar") || s.toLowerCase().endsWith(".war")) {
+                    totalSize += Paths.get(s).toFile().length();
+                }
+            }
+        } else {
+            List<String> jarList = new ArrayList<>();
+            if (rtJarPath != null) {
+                jarList.add(rtJarPath.toAbsolutePath().toString());
+            }
+            jarList.add(jarPath.toAbsolutePath().toString());
+            for (String s : jarList) {
+                if (s.toLowerCase().endsWith(".jar") || s.toLowerCase().endsWith(".war")) {
+                    totalSize += Paths.get(s).toFile().length();
+                }
+            }
+        }
+
+        int totalM = (int) (totalSize / 1024 / 1024);
+
+        int chose;
+        if (totalM > 1024) {
+            // 对于大于 1G 的 JAR 输入进行提示
+            chose = JOptionPane.showConfirmDialog(MainForm.getInstance().getMasterPanel(),
+                    "<html>加载 JAR/WAR 总大小 <strong>" + totalM + "</strong> MB<br>" +
+                            "文件内容过大，可能产生巨大的临时文件和数据库，可能非常消耗内存<br>" +
+                            "请确认是否要继续进行分析" +
+                            "</html>");
+        } else {
+            chose = JOptionPane.showConfirmDialog(MainForm.getInstance().getMasterPanel(),
+                    "加载 JAR/WAR 总大小 " + totalM + " MB 是否继续");
+        }
+        if (chose != 0) {
+            MainForm.getInstance().getStartBuildDatabaseButton().setEnabled(true);
+            return;
+        }
+
         MainForm.getInstance().getStartBuildDatabaseButton().setEnabled(false);
 
         List<ClassFileEntity> cfs;
         MainForm.getInstance().getBuildBar().setValue(10);
         if (Files.isDirectory(jarPath)) {
             logger.info("input is a dir");
-            LogUtil.log("input is a dir");
+            LogUtil.info("input is a dir");
             List<String> files = DirUtil.GetFiles(jarPath.toAbsolutePath().toString());
             if (rtJarPath != null) {
                 files.add(rtJarPath.toAbsolutePath().toString());
-                LogUtil.log("analyze with rt.jar file");
+                LogUtil.info("analyze with rt.jar file");
             }
             MainForm.getInstance().getTotalJarVal().setText(String.valueOf(files.size()));
             for (String s : files) {
@@ -54,13 +99,13 @@ public class CoreRunner {
             cfs = CoreUtil.getAllClassesFromJars(files);
         } else {
             logger.info("input is a jar file");
-            LogUtil.log("input is a jar");
+            LogUtil.info("input is a jar");
 
             List<String> jarList = new ArrayList<>();
             if (rtJarPath != null) {
                 jarList.add(rtJarPath.toAbsolutePath().toString());
                 MainForm.getInstance().getTotalJarVal().setText("2");
-                LogUtil.log("analyze with rt.jar file");
+                LogUtil.info("analyze with rt.jar file");
             } else {
                 MainForm.getInstance().getTotalJarVal().setText("1");
             }
@@ -111,7 +156,7 @@ public class CoreRunner {
         MainForm.getInstance().getBuildBar().setValue(15);
         AnalyzeEnv.classFileList.addAll(cfs);
         logger.info("get all class");
-        LogUtil.log("get all class");
+        LogUtil.info("get all class");
         DatabaseManager.saveClassFiles(AnalyzeEnv.classFileList);
         MainForm.getInstance().getBuildBar().setValue(20);
         DiscoveryRunner.start(AnalyzeEnv.classFileList, AnalyzeEnv.discoveredClasses,
@@ -121,7 +166,7 @@ public class CoreRunner {
         DatabaseManager.saveMethods(AnalyzeEnv.discoveredMethods);
         MainForm.getInstance().getBuildBar().setValue(30);
         logger.info("analyze class finish");
-        LogUtil.log("analyze class finish");
+        LogUtil.info("analyze class finish");
         for (MethodReference mr : AnalyzeEnv.discoveredMethods) {
             ClassReference.Handle ch = mr.getClassReference();
             if (AnalyzeEnv.methodsInClassMap.get(ch) == null) {
@@ -140,7 +185,7 @@ public class CoreRunner {
         AnalyzeEnv.inheritanceMap = InheritanceRunner.derive(AnalyzeEnv.classMap);
         MainForm.getInstance().getBuildBar().setValue(50);
         logger.info("build inheritance");
-        LogUtil.log("build inheritance");
+        LogUtil.info("build inheritance");
         Map<MethodReference.Handle, Set<MethodReference.Handle>> implMap =
                 InheritanceRunner.getAllMethodImplementations(AnalyzeEnv.inheritanceMap, AnalyzeEnv.methodMap);
         DatabaseManager.saveImpls(implMap);
@@ -155,7 +200,7 @@ public class CoreRunner {
         DatabaseManager.saveMethodCalls(AnalyzeEnv.methodCalls);
         MainForm.getInstance().getBuildBar().setValue(70);
         logger.info("build extra inheritance");
-        LogUtil.log("build extra inheritance");
+        LogUtil.info("build extra inheritance");
         for (ClassFileEntity file : AnalyzeEnv.classFileList) {
             try {
                 StringClassVisitor dcv = new StringClassVisitor(AnalyzeEnv.strMap, AnalyzeEnv.classMap, AnalyzeEnv.methodMap);
@@ -173,7 +218,7 @@ public class CoreRunner {
 
         MainForm.getInstance().getBuildBar().setValue(90);
         logger.info("build database finish");
-        LogUtil.log("build database finish");
+        LogUtil.info("build database finish");
 
         long fileSizeBytes = getFileSize();
         String fileSizeMB = formatSizeInMB(fileSizeBytes);
@@ -197,13 +242,14 @@ public class CoreRunner {
         config.setDbPath(Const.dbFile);
         config.setJarPath(MainForm.getInstance().getFileText().getText());
         config.setDbSize(fileSizeMB);
+        config.setLang("en");
         MainForm.setConfig(config);
         MainForm.setEngine(new CoreEngine(config));
 
         if (MainForm.getInstance().getAutoSaveCheckBox().isSelected()) {
             ConfigEngine.saveConfig(config);
             logger.info("auto save finish");
-            LogUtil.log("auto save finish");
+            LogUtil.info("auto save finish");
         }
 
         MainForm.getInstance().getFileTree().refresh();
