@@ -20,8 +20,8 @@
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="0" column="1" row-span="3" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <minimum-size width="600" height="750"/>
-                <preferred-size width="600" height="750"/>
+                <minimum-size width="700" height="750"/>
+                <preferred-size width="700" height="750"/>
               </grid>
             </constraints>
             <properties/>
@@ -31,9 +31,9 @@
           <tabbedpane id="91706" binding="tabbedPanel">
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="2" indent="0" use-parent-layout="false">
-                <minimum-size width="500" height="-1"/>
-                <preferred-size width="500" height="200"/>
-                <maximum-size width="500" height="-1"/>
+                <minimum-size width="550" height="-1"/>
+                <preferred-size width="550" height="200"/>
+                <maximum-size width="550" height="-1"/>
               </grid>
             </constraints>
             <properties/>
@@ -652,7 +652,7 @@
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
-                        <minimum-size width="500" height="300"/>
+                        <minimum-size width="550" height="300"/>
                       </grid>
                     </constraints>
                     <properties/>
@@ -679,7 +679,7 @@
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
-                        <minimum-size width="500" height="300"/>
+                        <minimum-size width="550" height="300"/>
                       </grid>
                     </constraints>
                     <properties/>
@@ -1068,7 +1068,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <grid id="3e46f" binding="javaVulSearchPanel" layout-manager="GridLayoutManager" row-count="5" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="3e46f" binding="javaVulSearchPanel" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -1178,6 +1178,78 @@
                         </constraints>
                         <properties>
                           <text value="Hessian readObject"/>
+                        </properties>
+                      </component>
+                      <component id="73365" class="javax.swing.JButton" binding="freeMarkerButton" default-binding="true">
+                        <constraints>
+                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="FreeMarker"/>
+                        </properties>
+                      </component>
+                      <component id="506a4" class="javax.swing.JButton" binding="JEXLButton">
+                        <constraints>
+                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="JEXL eval"/>
+                        </properties>
+                      </component>
+                      <component id="3db20" class="javax.swing.JButton" binding="rhinoEvalButton" default-binding="true">
+                        <constraints>
+                          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Rhino eval"/>
+                        </properties>
+                      </component>
+                      <component id="59ab0" class="javax.swing.JButton" binding="aviatorExecuteButton" default-binding="true">
+                        <constraints>
+                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Aviator execute"/>
+                        </properties>
+                      </component>
+                      <component id="2ce04" class="javax.swing.JButton" binding="mvelEvalButton">
+                        <constraints>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="MVEL eval"/>
+                        </properties>
+                      </component>
+                      <component id="b7923" class="javax.swing.JButton" binding="qlExpressButton">
+                        <constraints>
+                          <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="QLExpress"/>
+                        </properties>
+                      </component>
+                      <component id="46f2d" class="javax.swing.JButton" binding="sqlExecNoPrepareButton">
+                        <constraints>
+                          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="SQL exec (no prepare)"/>
+                        </properties>
+                      </component>
+                      <component id="19ffc" class="javax.swing.JButton" binding="sqlExecButton">
+                        <constraints>
+                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="SQL exec"/>
+                        </properties>
+                      </component>
+                      <component id="cd421" class="javax.swing.JButton" binding="xStreamButton">
+                        <constraints>
+                          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="XStream"/>
                         </properties>
                       </component>
                     </children>
@@ -1349,7 +1421,9 @@
                       </component>
                       <component id="43e7" class="javax.swing.JButton" binding="htmlGraphBtn">
                         <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                            <maximum-size width="150" height="-1"/>
+                          </grid>
                         </constraints>
                         <properties>
                           <text value="HTML Graph"/>

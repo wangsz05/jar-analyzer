@@ -33,6 +33,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -232,6 +234,15 @@ public class MainForm {
     private JScrollPane favScroll;
     private JList<MethodResult> favList;
     private JButton addToFavoritesButton;
+    private JButton freeMarkerButton;
+    private JButton JEXLButton;
+    private JButton rhinoEvalButton;
+    private JButton aviatorExecuteButton;
+    private JButton mvelEvalButton;
+    private JButton qlExpressButton;
+    private JButton sqlExecNoPrepareButton;
+    private JButton sqlExecButton;
+    private JButton xStreamButton;
     private static DefaultListModel<MethodResult> favData;
 
     public static String getCurClass() {
@@ -562,6 +573,38 @@ public class MainForm {
         return BCELLoadClassButton;
     }
 
+    public JButton getJEXLButton() {
+        return JEXLButton;
+    }
+
+    public JButton getRhinoEvalButton() {
+        return rhinoEvalButton;
+    }
+
+    public JButton getAviatorExecuteButton() {
+        return aviatorExecuteButton;
+    }
+
+    public JButton getMvelEvalButton() {
+        return mvelEvalButton;
+    }
+
+    public JButton getQlExpressButton() {
+        return qlExpressButton;
+    }
+
+    public JButton getSqlExecButton() {
+        return sqlExecButton;
+    }
+
+    public JButton getSqlExecNoPrepareButton() {
+        return sqlExecNoPrepareButton;
+    }
+
+    public JButton getXStreamButton() {
+        return xStreamButton;
+    }
+
     public JButton getDefineClassButton() {
         return defineClassButton;
     }
@@ -596,6 +639,10 @@ public class MainForm {
 
     public JButton getHessianButton() {
         return hessianButton;
+    }
+
+    public JButton getFreeMarkerButton() {
+        return freeMarkerButton;
     }
 
     public JButton getStartELSearchButton() {
@@ -786,6 +833,15 @@ public class MainForm {
         FastjsonVulAction.register();
         ZIPVulAction.register();
         HessianAction.register();
+        FreeMarkerAction.register();
+        JEXLAction.register();
+        RhinoAction.register();
+        AviatorAction.register();
+        MvelAction.register();
+        QLExpressAction.register();
+        XStreamAction.register();
+        SQLExecAction.register();
+        SQLExecNoPrepareAction.register();
 
         Font codeFont = FontHelper.getFont();
         instance.blackArea.setFont(codeFont);
@@ -1084,7 +1140,7 @@ public class MainForm {
         }
     }
 
-    public static void start() {
+    public static JFrame start() {
         UIHelper.setup();
         JFrame frame = new JFrame(Const.app);
         instance = new MainForm();
@@ -1093,15 +1149,29 @@ public class MainForm {
 
         frame.setJMenuBar(MenuUtil.createMenuBar());
         frame.setContentPane(instance.masterPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         frame.setIconImage(IconManager.showIcon.getImage());
 
-        UpdateChecker.checkUpdate();
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                int resp = JOptionPane.showConfirmDialog(frame, "CONFIRM EXIT?",
+                        "Exit Confirmation", JOptionPane.OK_CANCEL_OPTION);
+                if (resp == JOptionPane.OK_OPTION) {
+                    frame.dispose();
+                    System.exit(0);
+                }
+            }
+        });
+
+        UpdateChecker.check();
 
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setResizable(true);
-        frame.setVisible(true);
+        frame.setVisible(false);
+        return frame;
     }
 
     private void resolveConfig() {
@@ -1158,10 +1228,10 @@ public class MainForm {
         masterPanel.add(corePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         codePanel = new JPanel();
         codePanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        corePanel.add(codePanel, new GridConstraints(0, 1, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(600, 750), new Dimension(600, 750), null, 0, false));
+        corePanel.add(codePanel, new GridConstraints(0, 1, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(700, 750), new Dimension(700, 750), null, 0, false));
         codePanel.setBorder(BorderFactory.createTitledBorder(null, "Java Decompile Code", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         tabbedPanel = new JTabbedPane();
-        corePanel.add(tabbedPanel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(500, -1), new Dimension(500, 200), new Dimension(500, -1), 0, false));
+        corePanel.add(tabbedPanel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(550, -1), new Dimension(550, 200), new Dimension(550, -1), 0, false));
         startPanel = new JPanel();
         startPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPanel.addTab("start", startPanel);
@@ -1385,7 +1455,7 @@ public class MainForm {
         tabbedPanel.addTab("call", callPanel);
         callerPanel = new JPanel();
         callerPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        callPanel.add(callerPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(500, 300), null, null, 0, false));
+        callPanel.add(callerPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(550, 300), null, null, 0, false));
         callerPanel.setBorder(BorderFactory.createTitledBorder(null, "Caller", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         callerScroll = new JScrollPane();
         callerPanel.add(callerScroll, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
@@ -1395,7 +1465,7 @@ public class MainForm {
         callerScroll.setViewportView(callerList);
         calleePanel = new JPanel();
         calleePanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        callPanel.add(calleePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(500, 300), null, null, 0, false));
+        callPanel.add(calleePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(550, 300), null, null, 0, false));
         calleePanel.setBorder(BorderFactory.createTitledBorder(null, "Callee", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         calleeScroll = new JScrollPane();
         calleePanel.add(calleeScroll, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
@@ -1536,7 +1606,7 @@ public class MainForm {
         advancePanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPanel.addTab("advance", advancePanel);
         javaVulSearchPanel = new JPanel();
-        javaVulSearchPanel.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), -1, -1));
+        javaVulSearchPanel.setLayout(new GridLayoutManager(8, 3, new Insets(0, 0, 0, 0), -1, -1));
         advancePanel.add(javaVulSearchPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         javaVulSearchPanel.setBorder(BorderFactory.createTitledBorder(null, "Java Vulnerability", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         JNDIButton = new JButton();
@@ -1578,6 +1648,33 @@ public class MainForm {
         hessianButton = new JButton();
         hessianButton.setText("Hessian readObject");
         javaVulSearchPanel.add(hessianButton, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        freeMarkerButton = new JButton();
+        freeMarkerButton.setText("FreeMarker");
+        javaVulSearchPanel.add(freeMarkerButton, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        JEXLButton = new JButton();
+        JEXLButton.setText("JEXL eval");
+        javaVulSearchPanel.add(JEXLButton, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        rhinoEvalButton = new JButton();
+        rhinoEvalButton.setText("Rhino eval");
+        javaVulSearchPanel.add(rhinoEvalButton, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        aviatorExecuteButton = new JButton();
+        aviatorExecuteButton.setText("Aviator execute");
+        javaVulSearchPanel.add(aviatorExecuteButton, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        mvelEvalButton = new JButton();
+        mvelEvalButton.setText("MVEL eval");
+        javaVulSearchPanel.add(mvelEvalButton, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        qlExpressButton = new JButton();
+        qlExpressButton.setText("QLExpress");
+        javaVulSearchPanel.add(qlExpressButton, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sqlExecNoPrepareButton = new JButton();
+        sqlExecNoPrepareButton.setText("SQL exec (no prepare)");
+        javaVulSearchPanel.add(sqlExecNoPrepareButton, new GridConstraints(7, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sqlExecButton = new JButton();
+        sqlExecButton.setText("SQL exec");
+        javaVulSearchPanel.add(sqlExecButton, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        xStreamButton = new JButton();
+        xStreamButton.setText("XStream");
+        javaVulSearchPanel.add(xStreamButton, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         advancePanel.add(spacer2, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         piPanel = new JPanel();
@@ -1641,7 +1738,7 @@ public class MainForm {
         analysis.add(simpleFrameButton, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, new Dimension(150, -1), 0, false));
         htmlGraphBtn = new JButton();
         htmlGraphBtn.setText("HTML Graph");
-        analysis.add(htmlGraphBtn, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        analysis.add(htmlGraphBtn, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, new Dimension(150, -1), 0, false));
         leftPanel = new JPanel();
         leftPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         corePanel.add(leftPanel, new GridConstraints(0, 0, 4, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

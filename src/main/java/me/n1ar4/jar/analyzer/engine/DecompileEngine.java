@@ -7,6 +7,7 @@ import me.n1ar4.log.LogManager;
 import me.n1ar4.log.Logger;
 import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler;
 
+import javax.swing.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class DecompileEngine {
     private static final String JAVA_DIR = "jar-analyzer-decompile";
     private static final String JAVA_FILE = ".java";
     private static final String FERN_PREFIX = "//\n" +
-            "// Jar Analyzer V2 by 4ra1n\n" +
+            "// Jar Analyzer by 4ra1n\n" +
             "// (powered by FernFlower decompiler)\n" +
             "//\n";
 
@@ -33,8 +34,19 @@ public class DecompileEngine {
         lruCache = new LRUCache(30);
     }
 
-    public static void decompileJars(List<String> jarsPath, String outputDir) {
+    public static boolean decompileJars(List<String> jarsPath, String outputDir) {
         for (String jarPath : jarsPath) {
+            // 2024/08/21
+            // 对于非 JAR 文件不进行处理（仅支持 JAR 文件）
+            if (!jarPath.toLowerCase().endsWith(".jar")) {
+                JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(),
+                        "<html>" +
+                                "<p>ONLY SUPPORT <strong>JAR</strong> FILE</p>" +
+                                "<p>只支持 JAR 文件（其他类型的文件可以手动压缩成 JAR 后尝试）</p>" +
+                                "</html>");
+                return false;
+            }
+
             List<String> cmd = new ArrayList<>();
             Path jarPathPath = Paths.get(jarPath);
             cmd.add(jarPathPath.toAbsolutePath().toString());
@@ -64,6 +76,7 @@ public class DecompileEngine {
             } catch (Exception ignored) {
             }
         }
+        return true;
     }
 
     /**
@@ -80,7 +93,7 @@ public class DecompileEngine {
                 String key = classFilePath.toAbsolutePath().toString();
                 String data = lruCache.get(key);
                 if (data != null && !data.isEmpty()) {
-                    logger.info("use cache");
+                    logger.debug("use cache");
                     return data;
                 }
                 Path dirPath = Paths.get(Const.tempDir);
@@ -137,7 +150,7 @@ public class DecompileEngine {
                     Files.delete(newFilePath);
                 } catch (Exception ignored) {
                 }
-                logger.info("save cache");
+                logger.debug("save cache");
                 lruCache.put(key, codeStr);
                 return codeStr;
             } else {
