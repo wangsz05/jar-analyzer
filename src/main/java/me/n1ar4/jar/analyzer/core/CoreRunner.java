@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.core;
 
 import me.n1ar4.jar.analyzer.analyze.spring.SpringService;
@@ -10,6 +34,7 @@ import me.n1ar4.jar.analyzer.engine.CoreHelper;
 import me.n1ar4.jar.analyzer.entity.ClassFileEntity;
 import me.n1ar4.jar.analyzer.gui.MainForm;
 import me.n1ar4.jar.analyzer.gui.util.LogUtil;
+import me.n1ar4.jar.analyzer.gui.util.MenuUtil;
 import me.n1ar4.jar.analyzer.starter.Const;
 import me.n1ar4.jar.analyzer.utils.CoreUtil;
 import me.n1ar4.jar.analyzer.utils.DirUtil;
@@ -33,29 +58,22 @@ import java.util.*;
 public class CoreRunner {
     private static final Logger logger = LogManager.getLogger();
 
-    public static void run(Path jarPath, Path rtJarPath, boolean fixClass) {
+    public static void run(Path jarPath, Path rtJarPath, boolean fixClass, JDialog dialog) {
         // 2024-07-05 不允许太大的 JAR 文件
         long totalSize = 0;
+        List<String> beforeJarList = new ArrayList<>();
         if (Files.isDirectory(jarPath)) {
-            List<String> files = DirUtil.GetFiles(jarPath.toAbsolutePath().toString());
-            if (rtJarPath != null) {
-                files.add(rtJarPath.toAbsolutePath().toString());
-            }
-            for (String s : files) {
-                if (s.toLowerCase().endsWith(".jar") || s.toLowerCase().endsWith(".war")) {
-                    totalSize += Paths.get(s).toFile().length();
-                }
-            }
+            beforeJarList.addAll(DirUtil.GetFiles(jarPath.toAbsolutePath().toString()));
         } else {
-            List<String> jarList = new ArrayList<>();
-            if (rtJarPath != null) {
-                jarList.add(rtJarPath.toAbsolutePath().toString());
-            }
-            jarList.add(jarPath.toAbsolutePath().toString());
-            for (String s : jarList) {
-                if (s.toLowerCase().endsWith(".jar") || s.toLowerCase().endsWith(".war")) {
-                    totalSize += Paths.get(s).toFile().length();
-                }
+            beforeJarList.add(jarPath.toAbsolutePath().toString());
+
+        }
+        if (rtJarPath != null) {
+            beforeJarList.add(rtJarPath.toAbsolutePath().toString());
+        }
+        for (String s : beforeJarList) {
+            if (s.toLowerCase().endsWith(".jar") || s.toLowerCase().endsWith(".war")) {
+                totalSize += Paths.get(s).toFile().length();
             }
         }
 
@@ -81,6 +99,10 @@ public class CoreRunner {
             return;
         }
 
+        if (dialog != null) {
+            new Thread(() -> dialog.setVisible(true)).start();
+        }
+
         MainForm.getInstance().getStartBuildDatabaseButton().setEnabled(false);
 
         List<ClassFileEntity> cfs;
@@ -95,7 +117,8 @@ public class CoreRunner {
             }
             MainForm.getInstance().getTotalJarVal().setText(String.valueOf(files.size()));
             for (String s : files) {
-                if (s.toLowerCase().endsWith(".jar")) {
+                if (s.toLowerCase().endsWith(".jar") ||
+                        s.toLowerCase().endsWith(".war")) {
                     DatabaseManager.saveJar(s);
                 }
             }
@@ -123,13 +146,16 @@ public class CoreRunner {
         // BUG CLASS NAME
         for (ClassFileEntity cf : cfs) {
             String className = cf.getClassName();
-            int i = className.indexOf("classes");
-            if (className.contains("BOOT-INF")) {
-                className = className.substring(i + 8);
-            } else if (className.contains("WEB-INF")) {
-                className = className.substring(i + 7);
-            }
-            if (fixClass) {
+            if (!fixClass) {
+                int i = className.indexOf("classes");
+                if (className.contains("BOOT-INF") || className.contains("WEB-INF")) {
+                    // 从 BOOT-INF/classes 开始取
+                    // 从 WEB-INF/classes 开始取
+                    className = className.substring(i + 8);
+                }
+                // 如果 i 小于 0 (不包含 classes 目录) 直接设置
+                cf.setClassName(className);
+            } else {
                 // fix class name
                 Path parPath = Paths.get(Const.tempDir);
                 FixClassVisitor cv = new FixClassVisitor();
@@ -151,8 +177,6 @@ public class CoreRunner {
                 }
                 cf.setClassName(className);
                 cf.setPath(Paths.get(className));
-            } else {
-                cf.setClassName(className);
             }
         }
 
@@ -193,13 +217,25 @@ public class CoreRunner {
                 InheritanceRunner.getAllMethodImplementations(AnalyzeEnv.inheritanceMap, AnalyzeEnv.methodMap);
         DatabaseManager.saveImpls(implMap);
         MainForm.getInstance().getBuildBar().setValue(60);
-        for (Map.Entry<MethodReference.Handle, Set<MethodReference.Handle>> entry :
-                implMap.entrySet()) {
-            MethodReference.Handle k = entry.getKey();
-            Set<MethodReference.Handle> v = entry.getValue();
-            HashSet<MethodReference.Handle> calls = AnalyzeEnv.methodCalls.get(k);
-            calls.addAll(v);
+
+        // 2024/09/02
+        // 自动处理方法实现是可选的
+        // 具体参考 doc/README-others.md
+        if (MenuUtil.enableFixMethodImpl()) {
+            // 方法 -> [所有子类 override 方法列表]
+            for (Map.Entry<MethodReference.Handle, Set<MethodReference.Handle>> entry :
+                    implMap.entrySet()) {
+                MethodReference.Handle k = entry.getKey();
+                Set<MethodReference.Handle> v = entry.getValue();
+                // 当前方法的所有 callee 列表
+                HashSet<MethodReference.Handle> calls = AnalyzeEnv.methodCalls.get(k);
+                // 增加所有的 override 方法
+                calls.addAll(v);
+            }
+        } else {
+            logger.warn("enable fix method impl/override is recommend");
         }
+
         DatabaseManager.saveMethodCalls(AnalyzeEnv.methodCalls);
         MainForm.getInstance().getBuildBar().setValue(70);
         logger.info("build extra inheritance");
@@ -271,7 +307,15 @@ public class CoreRunner {
         AnalyzeEnv.controllers.clear();
         System.gc();
 
+        // DISABLE WHITE/BLACK LIST
+        MainForm.getInstance().getClassBlackArea().setEditable(false);
+        MainForm.getInstance().getClassWhiteArea().setEditable(false);
+
         CoreHelper.refreshSpringC();
+
+        if (dialog != null) {
+            dialog.dispose();
+        }
     }
 
     private static long getFileSize() {

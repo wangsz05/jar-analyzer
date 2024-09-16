@@ -51,6 +51,8 @@
 - 自从 `3.0` 版本后支持代码区域选中字符串右键搜索（参考 [示例图](img/0054.png)）
 - 自从 `3.0` 版本后支持方法右键添加备忘录（参考 [示例图](img/0055.png)）
 - 自从 `3.0` 版本后新增多种常见的 `JAVA RCE` 漏洞调用一键搜索功能
+- 自从 `3.1` 版本后支持 `BCEL` 字符串一键反编译 `Java` 代码（参考 [示例图](img/0061.png)）
+- 自从 `3.1` 版本后远程 `Tomcat` 分析改为 `premain` 方式（参考 [示例图](img/0062.png)）
 
 更多的功能正在开发中
 
@@ -75,18 +77,30 @@
 
 ## 相关
 
-时间
+想深入交流可以发联系方式到邮箱后我拉你进群：`ZW15aXFpbmdAZ21haWwuY29t`
+
+### 感谢列表
+
+<a href="https://github.com/jar-analyzer/jar-analyzer/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=jar-analyzer/jar-analyzer"  alt="contributors"/>
+</a>
+
+### 时间
 
 - `Jar Analyzer V1` 最初版诞生于 `2022.11.27`
 - `Jar Analyzer V2` 在 `2023.10.23` 第一次提交
 - `Jar Analyzer v2` 正式版在 `2023.12.07` 发布
 - `Jar Analyzer V2` 在 `2024.08.15` 发布 `3.0` 版本
 
-发版时间（目前版本 `3.X` 计划每三周发一次）
+### 发版时间
 
-- 2024.09.05
-- 2024.09.26
-- 2024.10.17
+目前版本 `3.X` 计划每月更新一次（如果有重大更新可能发布 `4.X` 版本）
+
+- 2024.10.08
+- 2024.11.08
+- 2024.12.08
+
+### 文章视频
 
 用户使用文章
 
@@ -99,9 +113,11 @@
 - [通过 jar-analyzer 分析漏洞 CVE-2022-42889](https://www.bilibili.com/video/BV1a94y1E7Nn)
 - [Jar Analyzer V2 新版本功能介绍](https://www.bilibili.com/video/BV1Dm421G75i)
 
-性能测试：参考 [性能测试文档](doc/README-test.md) 对比分析 `G1GC` 和 `ZGC` 情况
+### 性能测试
 
-漏洞公告
+参考 [性能测试文档](doc/README-test.md) 对比分析 `G1GC` 和 `ZGC` 情况
+
+### 漏洞公告
 
 - [\[GHSA-43rf-3hm4-hv5f\] 反编译恶意的 CLASS 文件可能导致程序不可用](https://github.com/jar-analyzer/jar-analyzer/security/advisories/GHSA-43rf-3hm4-hv5f)
 - [\[GHSA-x5h2-78p8-w943\] Jar Analyzer 2.13 版本之前存在 SQL 注入漏洞](https://github.com/jar-analyzer/jar-analyzer/security/advisories/GHSA-x5h2-78p8-w943)
@@ -109,11 +125,35 @@
 
 注意：当 `Jar` 数量较多或巨大时**可能导致临时目录和数据库文件巨大**
 
+有 `UI` 兼容性问题请查看 `ISSUE` 部分的置顶
+
+### BUILD
+
+注意：首先对你的 `IDEA` 进行设置（本项目不支持 `Eclipse/VS Code` 等 `IDE` 环境）
+
+![](img/0063.png)
+
+编译和构建过程如下：（以 `Windows` 为例其他环境类似）
+
+1. 重要：确保你安装了 `JDK 8 64位` （无论 `Oracle JDK` 或 `OpenJDK` 都可）
+2. 重要：如果你修改了代码请确保在 `IDEA` 环境中至少启动一次（生成 `GUI` 代码）
+3. 重要：确保你安装了 `Maven 3.X` 并正确配置了 `PATH` 变量（需要使用 `mvn` 命令）
+4. 可选：运行 `Contributor` 和 `ContributorMD` 生成最新贡献者信息
+5. 可选：构建 `agent` 子项目 `cd agent && package.bat`
+6. 重要：构建核心项目 `package.bat`
+7. 可选：使用 `cmake` 构建 `native` 目录生成 `dll` 文件放入 `resources`
+8. 可选：使用 `winres` 和 `gcc` 构建启动 `exe` 文件和图标信息
+9. 可选：完整发版参考 `build.py` 和 `build.yml` 文件
+
 ## 表达式
 
 表达式搜索是 `jar-analzyer` 重要的高级功能：可以自定义多种条件组合搜索方法
 
-[文档](doc/README-el.md)
+表达式搜索位于首页以及 `Advance` 的 `Plugins` 部分
+
+![](img/0028.png)
+
+[详细文档](doc/README-el.md)
 
 ## 截图
 
@@ -157,6 +197,10 @@
 
 以上是基础功能，进阶和测试性的功能请参考：[进阶测试性功能](doc/README-advance.md)
 
+例如类似 `OD/GDB` 的指令级 `GUI` 调试（未完成）
+
+![](img/0035.png)
+
 ## 快捷键
 
 - `CTRL+X` 方法交叉引用 快速跳转方法 `caller` 和 `callee` 页面
@@ -198,6 +242,8 @@ set "theme_name=default"
 
 ## 其他
 
+解释一些内部的原理和注意事项
+
 [文档](doc/README-others.md)
 
 ## 参考
@@ -207,16 +253,6 @@ set "theme_name=default"
 ## API
 
 [文档](doc/README-api.md)
-
-## BUILD
-
-编译和构建过程如下：
-
-1. 构建核心项目 `mvn -B clean package -DskipTests --file pom.xml`
-2. 构建`agent`子项目 `mvn -B clean package -DskipTests --file agent\pom.xml`
-3. 使用`cmake`构建`native`目录的`C`代码生成`dll`文件放入`resources`
-4. 使用`winres`和`gcc`构建启动`exe`文件和图标信息 
-5. 参考`build.py`和`build.yml`文件进行最终的文件合并和版本构建
 
 ## Thanks
 

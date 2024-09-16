@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.core;
 
 import java.util.HashMap;
@@ -41,18 +65,7 @@ public class InheritanceRunner {
     public static Map<MethodReference.Handle, Set<MethodReference.Handle>> getAllMethodImplementations(
             InheritanceMap inheritanceMap, Map<MethodReference.Handle, MethodReference> methodMap) {
         Map<ClassReference.Handle, Set<MethodReference.Handle>> methodsByClass = getMethodsByClass(methodMap);
-        Map<ClassReference.Handle, Set<ClassReference.Handle>> subClassMap = new HashMap<>();
-        for (Map.Entry<ClassReference.Handle, Set<ClassReference.Handle>> entry : inheritanceMap.entrySet()) {
-            for (ClassReference.Handle parent : entry.getValue()) {
-                if (!subClassMap.containsKey(parent)) {
-                    Set<ClassReference.Handle> subClasses = new HashSet<>();
-                    subClasses.add(entry.getKey());
-                    subClassMap.put(parent, subClasses);
-                } else {
-                    subClassMap.get(parent).add(entry.getKey());
-                }
-            }
-        }
+        Map<ClassReference.Handle, Set<ClassReference.Handle>> subClassMap = inheritanceMap.getSubClassMap();
         Map<MethodReference.Handle, Set<MethodReference.Handle>> methodImplMap = new HashMap<>();
         for (MethodReference method : methodMap.values()) {
             if (method.isStatic()) {
@@ -61,10 +74,14 @@ public class InheritanceRunner {
             Set<MethodReference.Handle> overridingMethods = new HashSet<>();
             Set<ClassReference.Handle> subClasses = subClassMap.get(method.getClassReference());
             if (subClasses != null) {
+                // 遍历某个方法的所有子类
                 for (ClassReference.Handle subClass : subClasses) {
                     Set<MethodReference.Handle> subClassMethods = methodsByClass.get(subClass);
                     if (subClassMethods != null) {
+                        // 所有子类的方法
                         for (MethodReference.Handle subClassMethod : subClassMethods) {
+                            // 子类方法名和 DESC 完全一致
+                            // 这是 override 方法
                             if (subClassMethod.getName().equals(method.getName()) &&
                                     subClassMethod.getDesc().equals(method.getDesc())) {
                                 overridingMethods.add(subClassMethod);
@@ -73,6 +90,7 @@ public class InheritanceRunner {
                     }
                 }
             }
+            // 方法 -> [所有子类 override 方法列表]
             if (!overridingMethods.isEmpty()) {
                 methodImplMap.put(method.getHandle(), overridingMethods);
             }

@@ -1,10 +1,33 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.mybatis;
 
 import com.alibaba.fastjson2.JSON;
 import me.n1ar4.jar.analyzer.gui.MainForm;
 import me.n1ar4.jar.analyzer.gui.util.MenuUtil;
-import me.n1ar4.log.LogManager;
-import me.n1ar4.log.Logger;
+import me.n1ar4.jar.analyzer.utils.CommonLogUtil;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -16,10 +39,6 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -31,22 +50,6 @@ import java.util.Properties;
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class,
                 RowBounds.class, ResultHandler.class})})
 public class PrintSqlInterceptor implements Interceptor {
-    private static final Path logDir = Paths.get("logs");
-    private static final Path outputPath = logDir.resolve(Paths.get("sql.log"));
-    private static final Logger logger = LogManager.getLogger();
-
-    static {
-        try {
-            Files.createDirectories(logDir);
-        } catch (Exception ignored) {
-        }
-        try {
-            Files.createFile(outputPath);
-        } catch (Exception ignored) {
-        }
-        logger.info("init sql interceptor");
-    }
-
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         if (MainForm.getEngine() == null || !MainForm.getEngine().isEnabled()) {
@@ -120,6 +123,7 @@ public class PrintSqlInterceptor implements Interceptor {
         return value.replace("$", "\\$");
     }
 
+    @SuppressWarnings("all")
     static class SqlLog {
         private long costTime;
         private String sql;
@@ -146,12 +150,7 @@ public class PrintSqlInterceptor implements Interceptor {
         sqlLog.setCostTime(time);
         sqlLog.setSql(sql);
         String data = JSON.toJSONString(sqlLog);
-        data = data + "\n";
-        try {
-            Files.write(outputPath, data.getBytes(), StandardOpenOption.APPEND);
-        } catch (Exception ex) {
-            logger.error(ex.toString());
-        }
+        CommonLogUtil.log(data, "sql");
     }
 
     @Override

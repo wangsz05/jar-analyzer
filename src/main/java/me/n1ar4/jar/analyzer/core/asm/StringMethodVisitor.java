@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.core.asm;
 
 import me.n1ar4.jar.analyzer.core.ClassReference;
@@ -9,12 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 public class StringMethodVisitor extends MethodVisitor {
-    private final String ownerName;
-    private final String methodName;
-    private final String methodDesc;
     private final Map<MethodReference.Handle, List<String>> strMap;
-    private final Map<ClassReference.Handle, ClassReference> classMap;
-    private final Map<MethodReference.Handle, MethodReference> methodMap;
+
+    private MethodReference ownerHandle = null;
 
     public StringMethodVisitor(int api, MethodVisitor methodVisitor,
                                String owner, String methodName, String desc,
@@ -23,11 +44,13 @@ public class StringMethodVisitor extends MethodVisitor {
                                Map<MethodReference.Handle, MethodReference> methodMap) {
         super(api, methodVisitor);
         this.strMap = strMap;
-        this.ownerName = owner;
-        this.methodName = methodName;
-        this.methodDesc = desc;
-        this.classMap = classMap;
-        this.methodMap = methodMap;
+        ClassReference.Handle ch = new ClassReference.Handle(owner);
+        if (classMap.get(ch) != null) {
+            MethodReference m = methodMap.get(new MethodReference.Handle(ch, methodName, desc));
+            if (m != null) {
+                this.ownerHandle = m;
+            }
+        }
     }
 
     public static boolean isPrintable(String str) {
@@ -36,18 +59,9 @@ public class StringMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitLdcInsn(Object o) {
+        if (this.ownerHandle == null)
+            return;
         if (o instanceof String) {
-            MethodReference mr = null;
-            ClassReference.Handle ch = new ClassReference.Handle(ownerName);
-            if (classMap.get(ch) != null) {
-                MethodReference m = methodMap.get(new MethodReference.Handle(ch, methodName, methodDesc));
-                if (m != null) {
-                    mr = m;
-                }
-            }
-            if (mr == null) {
-                return;
-            }
             String str = (String) o;
             if (str.trim().isEmpty()) {
                 return;
@@ -55,9 +69,9 @@ public class StringMethodVisitor extends MethodVisitor {
             if (!isPrintable(str)) {
                 return;
             }
-            List<String> mList = strMap.getOrDefault(mr.getHandle(), new ArrayList<>());
+            List<String> mList = strMap.getOrDefault(this.ownerHandle.getHandle(), new ArrayList<>());
             mList.add(str);
-            strMap.put(mr.getHandle(), mList);
+            strMap.put(this.ownerHandle.getHandle(), mList);
         }
         super.visitLdcInsn(o);
     }

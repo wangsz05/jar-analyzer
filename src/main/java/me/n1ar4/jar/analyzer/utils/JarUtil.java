@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.utils;
 
 import me.n1ar4.jar.analyzer.core.AnalyzeEnv;
@@ -26,10 +50,7 @@ public class JarUtil {
     public static List<ClassFileEntity> resolveNormalJarFile(String jarPath) {
         try {
             Path tmpDir = Paths.get(Const.tempDir);
-            try {
-                Files.createDirectory(tmpDir);
-            } catch (Exception ignored) {
-            }
+            classFileSet.clear();
             resolve(jarPath, tmpDir);
             return new ArrayList<>(classFileSet);
         } catch (Exception e) {
@@ -38,8 +59,18 @@ public class JarUtil {
         return new ArrayList<>();
     }
 
-    private static boolean shouldRun(String whiteText, String text, String saveClass) {
+    private static boolean shouldRun(String whiteText, String blackText, String saveClass) {
         boolean whiteDoIt = false;
+
+        // 处理 BOOT-INF WEB-INF 的问题
+        int i = saveClass.indexOf("classes");
+        if (i > 0) {
+            if (saveClass.contains("BOOT-INF") || saveClass.contains("WEB-INF")) {
+                saveClass = saveClass.substring(i + 8, saveClass.length() - 6);
+            } else {
+                saveClass = saveClass.substring(0, saveClass.length() - 6);
+            }
+        }
 
         if (whiteText != null && !StringUtil.isNull(whiteText)) {
             ArrayList<String> data = ListParser.parse(whiteText);
@@ -74,8 +105,8 @@ public class JarUtil {
         }
 
         boolean doIt = true;
-        if (text != null && !StringUtil.isNull(text)) {
-            ArrayList<String> data = ListParser.parse(text);
+        if (blackText != null && !StringUtil.isNull(blackText)) {
+            ArrayList<String> data = ListParser.parse(blackText);
             String className = saveClass;
             if (className.endsWith(".class")) {
                 className = className.substring(0, className.length() - 6);
@@ -144,8 +175,7 @@ public class JarUtil {
                 } else {
                     return;
                 }
-            }
-            if (jarPathStr.toLowerCase(Locale.ROOT).endsWith(".jar") ||
+            } else if (jarPathStr.toLowerCase(Locale.ROOT).endsWith(".jar") ||
                     jarPathStr.toLowerCase(Locale.ROOT).endsWith(".war")) {
                 InputStream is = Files.newInputStream(jarPath);
                 JarInputStream jarInputStream = new JarInputStream(is);

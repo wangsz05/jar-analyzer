@@ -1,32 +1,65 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.gui;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import me.n1ar4.jar.analyzer.starter.Const;
+import me.n1ar4.jar.analyzer.utils.OSUtil;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.text.MessageFormat;
 import java.util.Locale;
 
 public class ChangeLogForm {
+    public static final String HTML_TEMPLATE = "<html><head><meta charset=\"UTF-8\"></head>" +
+            "<body style='font-family:SimSun;'>{0}</body></html>";
     private JPanel masterPanel;
     private JScrollPane scroll;
     private JEditorPane text;
 
-    public static void start(String code) {
-        JFrame frame = new JFrame(Const.ChangeLogForm);
+    public static void start(String title, String code) {
+        JFrame frame = new JFrame(title);
         ChangeLogForm instance = new ChangeLogForm();
 
         instance.text.setContentType("text/html");
+        if (OSUtil.isMac()) {
+            code = MessageFormat.format(HTML_TEMPLATE, code);
+        }
         instance.text.setText(code);
         instance.text.setCaretPosition(0);
 
         frame.setContentPane(instance.masterPanel);
         frame.setResizable(false);
-        frame.setLocationRelativeTo(MainForm.getInstance().getMasterPanel());
+
         frame.pack();
+
+        frame.setLocationRelativeTo(MainForm.getInstance().getMasterPanel());
+
         frame.setVisible(true);
     }
 

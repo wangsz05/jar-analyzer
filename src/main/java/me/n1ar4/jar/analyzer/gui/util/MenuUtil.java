@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023-2024 4ra1n (Jar Analyzer Team)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.n1ar4.jar.analyzer.gui.util;
 
 import com.github.rjeschke.txtmark.Processor;
@@ -17,6 +41,7 @@ import me.n1ar4.shell.analyzer.form.ShellForm;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -32,6 +57,10 @@ public class MenuUtil {
     private static final JCheckBoxMenuItem logAllSqlConfig = new JCheckBoxMenuItem("save all sql statement");
     private static final JCheckBoxMenuItem chineseConfig = new JCheckBoxMenuItem("Chinese");
     private static final JCheckBoxMenuItem englishConfig = new JCheckBoxMenuItem("English");
+    private static final JCheckBoxMenuItem enableFixMethodImplConfig = new JCheckBoxMenuItem(
+            "enable fix methods impl/override");
+    private static final JCheckBoxMenuItem disableFixMethodImplConfig = new JCheckBoxMenuItem(
+            "disable fix methods impl/override");
 
     public static void setLangFlag() {
         if (GlobalOptions.getLang() == GlobalOptions.CHINESE) {
@@ -47,6 +76,7 @@ public class MenuUtil {
         sortedByMethodConfig.setState(false);
         sortedByClassConfig.setState(true);
         logAllSqlConfig.setSelected(true);
+        enableFixMethodImplConfig.setSelected(true);
 
         chineseConfig.addActionListener(e -> {
             chineseConfig.setState(chineseConfig.getState());
@@ -95,6 +125,16 @@ public class MenuUtil {
             sortedByClassConfig.setState(sortedByClassConfig.getState());
             sortedByMethodConfig.setState(!sortedByClassConfig.getState());
         });
+
+        enableFixMethodImplConfig.addActionListener(e -> {
+            enableFixMethodImplConfig.setState(enableFixMethodImplConfig.getState());
+            disableFixMethodImplConfig.setState(!enableFixMethodImplConfig.getState());
+        });
+
+        disableFixMethodImplConfig.addActionListener(e -> {
+            disableFixMethodImplConfig.setState(disableFixMethodImplConfig.getState());
+            enableFixMethodImplConfig.setState(!disableFixMethodImplConfig.getState());
+        });
     }
 
     public static JCheckBoxMenuItem getShowInnerConfig() {
@@ -117,6 +157,14 @@ public class MenuUtil {
         return sortedByClassConfig.getState();
     }
 
+    public static boolean enableFixMethodImpl() {
+        return enableFixMethodImplConfig.getState();
+    }
+
+    public static boolean disableFixMethodImpl() {
+        return disableFixMethodImplConfig.getState();
+    }
+
     public static JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(createAboutMenu());
@@ -127,6 +175,7 @@ public class MenuUtil {
         menuBar.add(createGames());
         JMenu system = new JMenu("system info");
         JMenuItem systemItem = new JMenuItem("open");
+        systemItem.setIcon(IconManager.javaIcon);
         systemItem.addActionListener(e -> SystemChart.start0());
         system.add(systemItem);
         menuBar.add(system);
@@ -220,6 +269,8 @@ public class MenuUtil {
             configMenu.add(fixClassPathConfig);
             configMenu.add(sortedByMethodConfig);
             configMenu.add(sortedByClassConfig);
+            configMenu.add(enableFixMethodImplConfig);
+            configMenu.add(disableFixMethodImplConfig);
             configMenu.add(logAllSqlConfig);
             JMenuItem partitionConfig = new JMenuItem("partition config");
             partitionConfig.setIcon(IconManager.javaIcon);
@@ -299,12 +350,38 @@ public class MenuUtil {
                     for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
                         out.append(buffer, 0, numRead);
                     }
-                    ChangeLogForm.start(Processor.process(out.toString()));
+                    ChangeLogForm.start(Const.ChangeLogForm, Processor.process(out.toString()));
                 } catch (Exception ex) {
                     logger.error("error: {}", ex.toString());
                 }
             });
             aboutMenu.add(changelogItem);
+            JMenuItem thanksItem = new JMenuItem("thanks");
+            is = MainForm.class.getClassLoader().getResourceAsStream("img/github.png");
+            if (is == null) {
+                return null;
+            }
+            imageIcon = new ImageIcon(ImageIO.read(is));
+            thanksItem.setIcon(imageIcon);
+            thanksItem.addActionListener(e -> {
+                try {
+                    InputStream i = MenuUtil.class.getClassLoader().getResourceAsStream("thanks.md");
+                    if (i == null) {
+                        return;
+                    }
+                    int bufferSize = 1024;
+                    char[] buffer = new char[bufferSize];
+                    StringBuilder out = new StringBuilder();
+                    Reader in = new InputStreamReader(i, StandardCharsets.UTF_8);
+                    for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
+                        out.append(buffer, 0, numRead);
+                    }
+                    ChangeLogForm.start("THANKS", Processor.process(out.toString()));
+                } catch (Exception ex) {
+                    logger.error("error: {}", ex.toString());
+                }
+            });
+            aboutMenu.add(thanksItem);
             JMenuItem checkUpdateItem = new JMenuItem("check update");
             is = MainForm.class.getClassLoader().getResourceAsStream("img/normal.png");
             if (is == null) {
@@ -322,12 +399,50 @@ public class MenuUtil {
                 String ver = body.trim();
                 LogUtil.info("latest: " + ver);
                 String output;
-                output = String.format("%s: %s\n%s: %s",
-                        "Current Version", Const.version,
-                        "Latest Version", ver);
+                output = String.format("<html>" +
+                                "<p>本项目是免费开源软件，不存在任何商业版本/收费版本</p>" +
+                                "<p>This project is free and open-source software</p>" +
+                                "<p>There are no commercial or paid versions</p>" +
+                                "<p>%s: %s</p>" +
+                                "<p>%s: %s</p>" +
+                                "</html>",
+                        "当前版本 / Current Version", Const.version,
+                        "最新版本 / Latest Version", ver);
                 JOptionPane.showMessageDialog(MainForm.getInstance().getMasterPanel(), output);
             }).start());
             aboutMenu.add(checkUpdateItem);
+            JMenuItem aboutItem = new JMenuItem("about");
+            is = MainForm.class.getClassLoader().getResourceAsStream("img/java.png");
+            if (is == null) {
+                return null;
+            }
+            imageIcon = new ImageIcon(ImageIO.read(is));
+            aboutItem.setIcon(imageIcon);
+            aboutItem.addActionListener(e -> new Thread(() -> {
+                InputStream aboutIs = MainForm.class.getClassLoader().getResourceAsStream("img/about.png");
+                if (aboutIs != null) {
+                    try {
+                        ImageIcon aboutIcon = new ImageIcon(ImageIO.read(aboutIs));
+                        JFrame aboutFrame = new JFrame(String.format("about - jar-analyzer v%s @ 4ra1n", Const.version));
+                        aboutFrame.setResizable(false);
+                        aboutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        aboutFrame.setSize(450, 530);
+                        aboutFrame.setLayout(new BorderLayout());
+                        JLabel imageLabel = new JLabel(aboutIcon);
+                        aboutFrame.add(imageLabel, BorderLayout.NORTH);
+                        JLabel infoLabel = new JLabel("jar-analyzer project @ 4ra1n", JLabel.CENTER);
+                        aboutFrame.add(infoLabel, BorderLayout.CENTER);
+                        JTextField linkField = new JTextField("https://github.com/jar-analyzer/jar-analyzer");
+                        linkField.setEditable(false);
+                        linkField.setHorizontalAlignment(JTextField.CENTER);
+                        aboutFrame.add(linkField, BorderLayout.SOUTH);
+                        aboutFrame.setLocationRelativeTo(null);
+                        aboutFrame.setVisible(true);
+                    } catch (IOException ignored) {
+                    }
+                }
+            }).start());
+            aboutMenu.add(aboutItem);
             return aboutMenu;
         } catch (Exception ex) {
             return null;
